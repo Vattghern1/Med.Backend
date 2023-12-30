@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Med.Common.Interfaces;
 
-public interface IInspecionService
+public interface IInspectionService
 {
 
 }
