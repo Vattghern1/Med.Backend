@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace Med.Common.Interfaces;
 
-public interface IConsultationService
+public interface IDictionaryService
 {
-
 
 }

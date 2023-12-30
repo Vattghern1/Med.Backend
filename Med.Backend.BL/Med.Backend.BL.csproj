@@ -7,12 +7,14 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="MailKit" Version="4.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\Med.Backend.DAL\Med.Backend.DAL.csproj" />
+    <ProjectReference Include="..\Med.Common\Med.Common.csproj" />
   </ItemGroup>
 
 </Project>
