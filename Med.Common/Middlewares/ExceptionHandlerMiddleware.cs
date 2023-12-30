@@ -35,6 +35,7 @@ public class ExceptionHandlerMiddleware
         {
             await _next(context);
         }
+
         catch (NotFoundException ex)
         {
             var errorDetails = new ErrorDetails
@@ -90,6 +91,7 @@ public class ExceptionHandlerMiddleware
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(errorDetails.ToString());
         }
+
         catch (NotImplementedException ex)
         {
             var errorDetails = new ErrorDetails
@@ -103,6 +105,7 @@ public class ExceptionHandlerMiddleware
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(errorDetails.ToString());
         }
+
         catch (MethodNotAllowedException ex)
         {
             var errorDetails = new ErrorDetails
@@ -116,6 +119,7 @@ public class ExceptionHandlerMiddleware
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(errorDetails.ToString());
         }
+
         catch (ServiceUnavailableException ex)
         {
             var errorDetails = new ErrorDetails
