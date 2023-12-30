@@ -12,7 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\Med.Backend.DAL\Med.Backend.DAL.csproj" />
+    <ProjectReference Include="..\Med.Common\Med.Common.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,4 +9,5 @@ namespace Med.Common.Interfaces;
 public interface IConsultationService
 {
 
+
 }
