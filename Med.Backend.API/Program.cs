@@ -66,7 +66,6 @@ var app = builder.Build();
 
 //await app.MigrateDbAsync();
 
-
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
