@@ -1,4 +1,5 @@
-﻿using Med.Common.Interfaces;
+﻿using Med.Common.Exceptions;
+using Med.Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
@@ -10,6 +11,7 @@ namespace Med.Backend.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/consultation")]
+[Authorize(AuthenticationSchemes = "Bearer")]
 public class ConsultationController : ControllerBase
 {
 
@@ -29,19 +31,57 @@ public class ConsultationController : ControllerBase
     }
 
     /// <summary>
-    /// 
+    /// Get a list of medical inspections for consultation
     /// </summary>
     [HttpGet]
-    [Route("123")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    public async Task<ActionResult> Get()
+    public async Task<ActionResult> GetConsultationList()
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
-            // throw new UnauthorizedException("User is not authorized");
+             throw new UnauthorizedException("User is not authorized");
         }
+        return Ok();
+    }
 
+    /// <summary>
+    /// Get concrete consultation
+    /// </summary>
+    [HttpGet]
+    [Route("{id}")]
+    public async Task<ActionResult> GetConsultation(Guid id)
+    {
+        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+        {
+            throw new UnauthorizedException("User is not authorized");
+        }
+        return Ok();
+    }
 
+    /// <summary>
+    /// Add comment to concrete consultation
+    /// </summary>
+    [HttpPost]
+    [Route("{id}/comment")]
+    public async Task<ActionResult> AddCommentToConsultation(Guid id)
+    {
+        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+        {
+            throw new UnauthorizedException("User is not authorized");
+        }
+        return Ok();
+    }
+
+    /// <summary>
+    /// Edit comment
+    /// </summary>
+    [HttpPut]
+    [Route("comment/{id}")]
+    public async Task<ActionResult> EditConsultationComment(Guid id)
+    {
+        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+        {
+            throw new UnauthorizedException("User is not authorized");
+        }
         return Ok();
     }
 }
