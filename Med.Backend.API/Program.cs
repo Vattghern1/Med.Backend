@@ -19,6 +19,8 @@ builder.Services.AddCors(options => {
 
 // Add services to the container.
 builder.Services.AddBackendServices(builder.Configuration);
+builder.Services.AddIdentityManagers();
+
 builder.Services.AddControllers().AddJsonOptions(opts => {
     var enumConverter = new JsonStringEnumConverter();
     opts.JsonSerializerOptions.Converters.Add(enumConverter);
@@ -64,7 +66,8 @@ builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();
 
-//await app.MigrateDbAsync();
+await app.MigrateDbAsync();
+await app.ConfigureIdentity();
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();

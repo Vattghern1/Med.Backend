@@ -9,12 +9,14 @@
 
 	<ItemGroup>
 		<PackageReference Include="MailKit" Version="4.1.0" />
+		<PackageReference Include="EPPlus" Version="4.5.3.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Med.Backend.DAL\Med.Backend.DAL.csproj" />
     <ProjectReference Include="..\Med.Common\Med.Common.csproj" />
+    <ProjectReference Include="..\Med.FileManager.BL\Med.FileManager.BL.csproj" />
   </ItemGroup>
 
 </Project>

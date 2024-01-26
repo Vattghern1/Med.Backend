@@ -9,7 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Med.Backend.API", "Med.Back
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Med.Backend.DAL", "Med.Backend.DAL\Med.Backend.DAL.csproj", "{EC02D590-A148-4A98-B941-D3F02A61280B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Med.Common", "Med.Common\Med.Common.csproj", "{B34D17EC-E844-4038-9368-E6894DB3088F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Med.Common", "Med.Common\Med.Common.csproj", "{B34D17EC-E844-4038-9368-E6894DB3088F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Med.FileManager.API", "Med.FileManager.API\Med.FileManager.API.csproj", "{AB7AB3E4-11B8-432B-96BC-5E1DD0809B87}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Med.FileManager.BL", "Med.FileManager.BL\Med.FileManager.BL.csproj", "{1604EE47-4AD0-4E0C-8AFA-ACB3AA3D2B6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{B34D17EC-E844-4038-9368-E6894DB3088F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B34D17EC-E844-4038-9368-E6894DB3088F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B34D17EC-E844-4038-9368-E6894DB3088F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB7AB3E4-11B8-432B-96BC-5E1DD0809B87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB7AB3E4-11B8-432B-96BC-5E1DD0809B87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB7AB3E4-11B8-432B-96BC-5E1DD0809B87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB7AB3E4-11B8-432B-96BC-5E1DD0809B87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1604EE47-4AD0-4E0C-8AFA-ACB3AA3D2B6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1604EE47-4AD0-4E0C-8AFA-ACB3AA3D2B6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1604EE47-4AD0-4E0C-8AFA-ACB3AA3D2B6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1604EE47-4AD0-4E0C-8AFA-ACB3AA3D2B6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

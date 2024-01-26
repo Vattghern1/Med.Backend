@@ -1,4 +1,8 @@
-﻿using Med.Common.Exceptions;
+﻿using Med.Common.DataTransferObjects;
+using Med.Common.Enums;
+using Med.Common.Exceptions;
+using Med.Common.Interfaces;
+using Med.Common.Other;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,47 +16,49 @@ namespace Med.Backend.API.Controllers;
 [Authorize(AuthenticationSchemes = "Bearer")]
 public class PatientController : ControllerBase
 {
-
-
-    private readonly ILogger<PatientController> _logger;
-    //private readonly IPatientService _patientService;
+    private readonly IPatientService _patientService;
 
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="logger"></param>
-   // /// <param name="patientService"></param>
-    public PatientController(ILogger<PatientController> logger)
+    /// <param name="patientService"></param>
+    public PatientController(IPatientService patientService)
     {
-        _logger = logger;
+        _patientService = patientService;
     }
 
     /// <summary>
     /// Create new patient
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult> CreateNewPatient()
+    public async Task<ActionResult<Guid>> CreateNewPatient([FromBody] PatientCreateModel patientCreateModel)
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
             throw new UnauthorizedException("User is not authorized");
         }
 
-        return Ok();
+        return Ok(await _patientService.CreateNewPatient(patientCreateModel));
     }
 
     /// <summary>
     /// Get patients list
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult> GetPatientList()
+    public async Task<ActionResult<PagedList<PatientModel>>> GetPatientList([FromQuery] string? name,
+        [FromQuery] List<Conclusion>? conclusions,
+        [FromQuery] Sorting? sorting,
+        [FromQuery] bool? scheduledVisits,
+        [FromQuery] bool? onlyMine,
+        [FromQuery] int page,
+        [FromQuery] int size)
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
             throw new UnauthorizedException("User is not authorized");
         }
 
-        return Ok();
+        return Ok(await _patientService.GetPatientList(name, conclusions, sorting, scheduledVisits, onlyMine, page, size, userId));
     }
 
     /// <summary>
@@ -60,14 +66,14 @@ public class PatientController : ControllerBase
     /// </summary>
     [HttpPost]
     [Route("{id}/inspections")]
-    public async Task<ActionResult> CreateInspectionForPatient()
+    public async Task<ActionResult<Guid>> CreateInspectionForPatient([FromBody] InspectionCreateModel inspectionCreateModel, Guid id)
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
             throw new UnauthorizedException("User is not authorized");
         }
 
-        return Ok();
+        return Ok(await _patientService.CreateInspectionForPatient(inspectionCreateModel, id, userId));
     }
 
     /// <summary>
@@ -75,14 +81,18 @@ public class PatientController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("{id}/inspections")]
-    public async Task<ActionResult> GetListOfPatientInspections()
+    public async Task<ActionResult<PagedList<InspectionPreviewModel>>> GetListOfPatientInspections(Guid id,
+        [FromQuery] bool grouped,
+        [FromQuery] List<string>? icdRoots,
+        [FromQuery] int page,
+        [FromQuery] int size)
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
             throw new UnauthorizedException("User is not authorized");
         }
 
-        return Ok();
+        return Ok(await _patientService.GetListOfPatientInspections(id, grouped, icdRoots, page, size));
     }
 
     /// <summary>
@@ -90,14 +100,14 @@ public class PatientController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("{id}")]
-    public async Task<ActionResult> GetPatientCard()
+    public async Task<ActionResult<PatientModel>> GetPatientCard(Guid id)
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
             throw new UnauthorizedException("User is not authorized");
         }
 
-        return Ok();
+        return Ok(await _patientService.GetPatientCard(id));
     }
 
     /// <summary>
@@ -105,13 +115,13 @@ public class PatientController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("{id}/inspections/search")]
-    public async Task<ActionResult> SearchForPatientInspections()
+    public async Task<ActionResult<List<InspectionShortModel>>> SearchForPatientInspections([FromQuery] string? request, Guid id)
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
             throw new UnauthorizedException("User is not authorized");
         }
 
-        return Ok();
+        return Ok(await _patientService.SearchForPatientInspections(request, id));
     }
 }
