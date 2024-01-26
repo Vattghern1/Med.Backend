@@ -1,6 +1,6 @@
 ﻿namespace Med.Common.Enums;
 
-public enum DiagnosisTypestring
+public enum DiagnosisType
 {
     Main, 
     Concominant, 

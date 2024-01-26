@@ -1,8 +1,12 @@
-﻿using Med.Common.Exceptions;
+﻿using Med.Backend.DAL.Migrations;
+using Med.Common.DataTransferObjects;
+using Med.Common.Exceptions;
 using Med.Common.Interfaces;
+using Med.Common.Other;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Med.Backend.API.Controllers;
 
@@ -34,13 +38,16 @@ public class ConsultationController : ControllerBase
     /// Get a list of medical inspections for consultation
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult> GetConsultationList()
+    public async Task<ActionResult<PagedList<InspectionPreviewModel>>> GetConsultationList([FromQuery] bool grouped,
+        [FromQuery] List<string> icdRoots,
+        [FromQuery] int page,
+        [FromQuery] int size)
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
              throw new UnauthorizedException("User is not authorized");
         }
-        return Ok();
+        return Ok(await _consultationService.GetConsultationList(grouped, icdRoots, page, size));
     }
 
     /// <summary>
@@ -48,13 +55,14 @@ public class ConsultationController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("{id}")]
-    public async Task<ActionResult> GetConsultation(Guid id)
+    public async Task<ActionResult<ConsultationModel>> GetConsultation(Guid id)
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
             throw new UnauthorizedException("User is not authorized");
         }
-        return Ok();
+
+        return Ok(await _consultationService.GetConsultation(id));
     }
 
     /// <summary>
@@ -62,13 +70,14 @@ public class ConsultationController : ControllerBase
     /// </summary>
     [HttpPost]
     [Route("{id}/comment")]
-    public async Task<ActionResult> AddCommentToConsultation(Guid id)
+    public async Task<ActionResult<Guid>> AddCommentToConsultation([FromBody] CommentCreateModel commentCreateModel,Guid id)
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
             throw new UnauthorizedException("User is not authorized");
         }
-        return Ok();
+
+        return Ok(await _consultationService.AddCommentToConsultation(commentCreateModel, id, userId));
     }
 
     /// <summary>
@@ -76,12 +85,13 @@ public class ConsultationController : ControllerBase
     /// </summary>
     [HttpPut]
     [Route("comment/{id}")]
-    public async Task<ActionResult> EditConsultationComment(Guid id)
+    public async Task<ActionResult> EditConsultationComment([FromBody] InspectionCommentCreateModel inspectionCommentCreateModel, Guid id)
     {
         if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
         {
             throw new UnauthorizedException("User is not authorized");
         }
+        await _consultationService.EditConsultationComment(inspectionCommentCreateModel, id, userId);
         return Ok();
     }
 }

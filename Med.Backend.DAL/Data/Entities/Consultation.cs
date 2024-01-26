@@ -6,17 +6,11 @@ using System.Threading.Tasks;
 
 namespace Med.Backend.DAL.Data.Entities;
 
-/// <summary>
-/// Entity for Consultation
-/// </summary>
 public class Consultation
 {
-    /// <summary>
-    /// Consultation id
-    /// </summary>
     public Guid Id { get; set; } = Guid.NewGuid();
-    /// <summary>
-    /// Date and time the Consultation was created
-    /// </summary>
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreateTime { get; set; } = DateTime.UtcNow;
+    public Guid SpecialityId { get; set; }
+    public List<Comment> Comments { get; set; } = new List<Comment>();
+    public Guid InspectionId { get; set; }
 }

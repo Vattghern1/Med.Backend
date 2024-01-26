@@ -1,5 +1,9 @@
-﻿using Med.Common.Exceptions;
+﻿using Med.Common.DataTransferObjects;
+using Med.Common.Exceptions;
+using Med.Common.Interfaces;
+using Med.Common.Other;
 using Microsoft.AspNetCore.Mvc;
+using System.Xml.Linq;
 
 namespace Med.Backend.API.Controllers;
 
@@ -10,19 +14,15 @@ namespace Med.Backend.API.Controllers;
 [Route("api/dictionary")]
 public class DictionaryController : ControllerBase
 {
-
-
-    private readonly ILogger<ConsultationController> _logger;
-    //private readonly IDictionaryService _dictionaryService;
+    private readonly IDictionaryService _dictionaryService;
 
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="logger"></param>
-   // /// <param name="dictionaryService"></param>
-    public DictionaryController(ILogger<ConsultationController> logger)
+    /// <param name="dictionaryService"></param>
+    public DictionaryController(IDictionaryService dictionaryService)
     {
-        _logger = logger;
+        _dictionaryService = dictionaryService;
     }
 
     /// <summary>
@@ -30,15 +30,9 @@ public class DictionaryController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("speciality")]
-    public async Task<ActionResult> GetSpecialityList()
+    public async Task<ActionResult<PagedList<SpecialityModel>>> GetSpecialityList([FromQuery] PaginationParamsDto pagination)
     {
-        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
-        {
-             throw new UnauthorizedException("User is not authorized");
-        }
-
-
-        return Ok();
+        return Ok(await _dictionaryService.GetSpecialityList(pagination));
     }
 
     /// <summary>
@@ -46,15 +40,11 @@ public class DictionaryController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("icd10")]
-    public async Task<ActionResult> SearchDiagnosesInDictionaty()
+    public async Task<ActionResult<PagedList<Icd10RecordModel>>> SearchDiagnosesInDictionaty([FromQuery] string? request,
+        [FromQuery] int page,
+        [FromQuery] int size)
     {
-        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
-        {
-             throw new UnauthorizedException("User is not authorized");
-        }
-
-
-        return Ok();
+        return Ok(await _dictionaryService.SearchDiagnosesInDictionaty(request, page, size));
     }
 
     /// <summary>
@@ -62,13 +52,8 @@ public class DictionaryController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("icd/roots")]
-    public async Task<ActionResult> GetRootICD10Elemements()
+    public async Task<ActionResult<List<Icd10RecordModel>>> GetRootICD10Elemements()
     {
-        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
-        {
-             throw new UnauthorizedException("User is not authorized");
-        }
-
-        return Ok();
+       return Ok(await _dictionaryService.GetRootICD10Elemements());
     }
 }
