@@ -249,41 +249,67 @@ public class InspectionService : IInspectionService
 
     public async Task<List<InspectionPreviewModel>> GetInspectionChain(Guid id)
     {
-
-        throw new NotImplementedException();
-/*        var inspection = await _backendDbContext.Inspections
+        var inspections = await _backendDbContext.Inspections
             .Include(i => i.Diagnoses)
-            .FirstOrDefaultAsync(i => i.Id == id);
+            .ToListAsync();
 
-        if (inspection == null)
+        if (inspections == null)
         {
             throw new NotFoundException("Inspection not found.");
         }
 
-        var inspections = _backendDbContext.Inspections
-            .ToList();
-
-        List<Inspection> inspectionChain = GetAllInspectionsRecursively(id, inspections);
+        IEnumerable<Inspection> inspectionChain = GetInspectionChain(id, inspections);
 
         List<InspectionPreviewModel> inspectionChainModels = new List<InspectionPreviewModel>();
-        foreach (var inspcetion in inspectionChain)
+        foreach (var inspetion in inspectionChain)
         {
-            inspection.Select
-        }*/
+            var inspectionPreviewModel = new InspectionPreviewModel
+            {
+                Id = inspetion.Id,
+                CreateTime = inspetion.CreateDate,
+                PreviousId = inspetion.PreviousInspectionId,
+                Conclusion = inspetion.Conclusion,
+                DoctorId = inspetion.DoctorId,
+                Doctor = inspetion.DoctorName,
+                PatientId = inspetion.PatientId,
+                Patient = inspetion.PatientName,
+                Diagnosis = inspetion.Diagnoses.Select(diagnosis => new DiagnosisModel
+                {
+                    Id = diagnosis.Id,
+                    CreateTime = diagnosis.CreateTime,
+                    Code = diagnosis.IcdDiagnosisId,
+                    Name = diagnosis.DiagnosName,
+                    Description = diagnosis.Description,
+                    Type = diagnosis.DiagnosisType
+
+                }).FirstOrDefault(d => d.Type == DiagnosisType.Main),
+                HasChain = inspections.Any(i => i.PreviousInspectionId == inspetion.Id),
+                HasNested = inspetion.PreviousInspectionId.HasValue, 
+            };
+            inspectionChainModels.Add(inspectionPreviewModel);
+        }
+
+        return inspectionChainModels;
     }
 
-    public List<Inspection> GetAllInspectionsRecursively(Guid? parentId, List<Inspection> nodeList)
+    public IEnumerable<Inspection> GetInspectionChain(Guid inputId, List<Inspection> inspections)
     {
-        var childInspections = nodeList.Where(n => n.PreviousInspectionId == parentId);
+        var result = new List<Inspection>();
+        var currentInspection = inspections.FirstOrDefault(i => i.Id == inputId);
 
-        List<Inspection> result = new List<Inspection>();
-        result.AddRange(childInspections);
-
-        foreach (var childNode in childInspections)
+        if (currentInspection != null)
         {
-            result.AddRange(GetAllInspectionsRecursively(childNode.Id, nodeList));
+            result.Add(currentInspection);
+            var childInspections = inspections.Where(i => i.PreviousInspectionId == currentInspection.Id);
+
+            foreach (var childInspection in childInspections)
+            {
+                var chain = GetInspectionChain(childInspection.Id, inspections);
+                result.AddRange(chain);
+            }
         }
 
         return result;
     }
+
 }
