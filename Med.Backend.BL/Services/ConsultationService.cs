@@ -22,6 +22,8 @@ public class ConsultationService : IConsultationService
         _backendDbContext = backendDbContext;
     }
 
+
+    //Получене консультаций
     public async Task<PagedList<InspectionPreviewModel>> GetConsultationList(bool? grouped, List<string> icdRoots, int page, int size)
     {
         string icdRootsRegex = "";
@@ -102,64 +104,68 @@ public class ConsultationService : IConsultationService
         var response = await PagedList<InspectionPreviewModel>.ToPagedList(inspectionsModels, page, size);
         return response;
     }
-        
-    
+
+    //Получене консультаций
     public async Task<ConsultationModel> GetConsultation(Guid id)
     {
-        var consultation = await _backendDbContext.Consultations
+        var c = await _backendDbContext.Consultations
             .Include(c => c.Comments)
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id);
 
-        if (consultation == null)
+        if (c == null)
         {
             throw new NotFoundException("Consultation not found.");
         }
 
-        var speciality = await _backendDbContext.Specialities
+        var s = await _backendDbContext.Specialities
             .AsNoTracking()
-            .FirstOrDefaultAsync(s => s.Id == consultation.SpecialityId);
+            .FirstOrDefaultAsync(s => s.Id == c.SpecialityId);
 
-        if (speciality == null)
+        if (s == null)
         {
             throw new ConflictException("Speciality not found.");
         }
 
         return new ConsultationModel
         {
-            Id = consultation.Id,
-            CreateTime = consultation.CreateTime,
-            InspectionId = consultation.InspectionId,
+            Id = c.Id,
+            CreateTime = c.CreateTime,
+            InspectionId = c.InspectionId,
             Speciality = new SpecialityModel
             {
-                Id = speciality.Id,
-                CreateTime = speciality.CreateTime,
-                Name = speciality.Name,
+                Id = s.Id,
+                CreateTime = s.CreateTime,
+                Name = s.Name,
             },
-            Comments = consultation.Comments.Select(comment => new CommentModel
+            Comments = c.Comments.Select(co => new CommentModel
             {
-                Id = comment.Id,
-                CreateTime = comment.CreateTime,
-                ModifiedDate = comment.ModifiedTime,
-                Content = comment.Content,
-                AuthorId = comment.AuthorId,
-                AuthorName = comment.AuthorName,
-                ParentId = comment.ParentCommentId
+                Id = co.Id,
+                CreateTime = co.CreateTime,
+                ModifiedDate = co.ModifiedTime,
+                Content = co.Content,
+                AuthorId = co.AuthorId,
+                AuthorName = co.AuthorName,
+                ParentId = co.ParentCommentId
             }).ToList(),
         };
     }
 
+    //Добавление комментария
     public async Task<Guid> AddCommentToConsultation(CommentCreateModel commentCreateModel, Guid consultationId, Guid userId)
     {
-        var consultation = await _backendDbContext.Consultations
+
+        //Поиск констультации
+        var с = await _backendDbContext.Consultations
             .Include(c => c.Comments)
             .FirstOrDefaultAsync(c => c.Id == consultationId);
 
-        if (consultation == null)
+        if (с == null)
         {
             throw new NotFoundException("Consultation not found.");
         }
 
+        //Поиск пользователя
         var user = await _backendDbContext.Users
             .FirstOrDefaultAsync(u => u.Id == userId);
 
@@ -168,19 +174,23 @@ public class ConsultationService : IConsultationService
             throw new ConflictException("User not found.");
         }
 
+
+        //Поиск специальности
         var specialityOfConsoltation = await _backendDbContext.Specialities
-            .FirstOrDefaultAsync(s => s.Id == consultation.SpecialityId);
+            .FirstOrDefaultAsync(s => s.Id == с.SpecialityId);
 
-        var inspection = await _backendDbContext.Inspections
+        var i = await _backendDbContext.Inspections
             .Include(i => i.Consultations)
-            .FirstOrDefaultAsync(i => i.Consultations.Any(c => c.Id == consultation.Id));
+            .FirstOrDefaultAsync(i => i.Consultations.Any(c => c.Id == с.Id));
 
-        if (inspection == null || inspection.DoctorId != userId || !user.UserSpecialities.Contains(specialityOfConsoltation!.Id))
+
+        //Учет прав
+        if (i == null || i.DoctorId != userId || !user.UserSpecialities.Contains(specialityOfConsoltation!.Id))
         {
             throw new ForbiddenException("You dont have permissions to write comment.");
         }
 
-
+        //Просмотр род ком
         if (commentCreateModel.ParentId != null)
         {
             var parentComment = await _backendDbContext.Comments
@@ -191,13 +201,15 @@ public class ConsultationService : IConsultationService
                 throw new NotFoundException("Parent comment not found.");
             }
 
-            if (!consultation.Comments.Contains(parentComment))
+            if (!с.Comments.Contains(parentComment))
             {
                 throw new ConflictException("Parent comment don't relate to consultation.");
             }
         }
 
-        var newComment = new Comment
+
+        //Создание нового
+        var com = new Comment
         {
             Content = commentCreateModel.Content,
             AuthorId = userId,
@@ -205,18 +217,23 @@ public class ConsultationService : IConsultationService
             ParentCommentId = commentCreateModel.ParentId
         };
 
-        consultation.Comments.Add(newComment);
-        await _backendDbContext.AddAsync(newComment);
+
+        //Добавленеи в бд
+        с.Comments.Add(com);
+        await _backendDbContext.AddAsync(com);
         await _backendDbContext.SaveChangesAsync();
 
-        return newComment.Id;
+        return com.Id;
     }
+
+    //Редактирование комментария консльтации
     public async Task EditConsultationComment(InspectionCommentCreateModel inspectionCommentCreateModel, Guid commentId, Guid userId)
     {
-        var comment = await _backendDbContext.Comments
+        var com = await _backendDbContext.Comments
             .FirstOrDefaultAsync(c => c.Id == commentId);
 
-        if (comment == null)
+        //Проверки
+        if (com == null)
         {
             throw new NotFoundException("Comment not found.");
         }
@@ -226,15 +243,15 @@ public class ConsultationService : IConsultationService
             throw new BadRequestException("Comment content can't be empty.");
         }
 
-        if (comment.AuthorId != userId)
+        if (com.AuthorId != userId)
         {
             throw new ForbiddenException("You dont have permissions to edit that comment.");
         }
 
-        comment.Content = inspectionCommentCreateModel.Content;
-        comment.ModifiedTime = DateTime.UtcNow;
+        com.Content = inspectionCommentCreateModel.Content;
+        com.ModifiedTime = DateTime.UtcNow;
 
-        _backendDbContext.Comments.Update(comment);
+        _backendDbContext.Comments.Update(com);
         await _backendDbContext.SaveChangesAsync();
     }
 }
